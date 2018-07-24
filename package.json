@@ -10,6 +10,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.3"
+    "assert": "^1.4.1",
+    "body-parser": "^1.18.3",
+    "eslint": "^5.2.0",
+    "express": "^4.16.3",
+    "mongodb": "^3.1.1",
+    "mongoose": "^5.2.4",
+    "nodemon": "^1.18.3"
   }
 }
