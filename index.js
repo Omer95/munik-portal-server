@@ -12,6 +12,30 @@ const connect = mongoose.connect(url);
 
 const app = express();
 app.use(bodyParser.json());
+
+function auth(req, res, next) {
+    console.log(req);
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        const err = new Error('You are not authenticated!');
+        res.setHeader('WWW-Authenticate', 'Basic');
+        res.status = 401;
+        return next(err);
+    }
+    const auth = new Buffer(authHeader.split(' ')[1], 'base64').toString().split(':');
+    const user = auth[0];
+    const password = auth[1];
+    if (user === 'admin' && password === 'password') {
+        next();
+    }
+    else {
+        const err = new Error('You are not authenticated!');
+        res.setHeader('WWW-Authenticate', 'Basic');
+        res.status = 401;
+        return next(err);
+    }
+}
+app.use(auth);
 app.use('/delegation', delegationRouter);
 
 connect.then((db) => {
