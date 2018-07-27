@@ -18,9 +18,9 @@ function auth(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
         const err = new Error('You are not authenticated!');
-        res.setHeader('WWW-Authenticate', 'Basic');
-        res.status = 401;
-        // res.writeHead(401, {"WWW-Authenticate": "Basic"});
+        // res.setHeader('WWW-Authenticate', 'Basic');
+        // res.status = 401;
+        res.writeHead(401, {"WWW-Authenticate": "Basic"});
         res.end('Authentication is needed');
         next(err);
         return;
