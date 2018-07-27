@@ -20,7 +20,10 @@ function auth(req, res, next) {
         const err = new Error('You are not authenticated!');
         res.setHeader('WWW-Authenticate', 'Basic');
         res.status = 401;
-        return next(err);
+        // res.writeHead(401, {"WWW-Authenticate": "Basic"});
+        res.end('Authentication is needed');
+        next(err);
+        return;
     }
     const auth = new Buffer(authHeader.split(' ')[1], 'base64').toString().split(':');
     const user = auth[0];
@@ -32,7 +35,7 @@ function auth(req, res, next) {
         const err = new Error('You are not authenticated!');
         res.setHeader('WWW-Authenticate', 'Basic');
         res.status = 401;
-        return next(err);
+        next(err);
     }
 }
 app.use(auth);
