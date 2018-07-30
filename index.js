@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const delegationRouter = require('./routes/delegationRouter');
 const mongoose = require('mongoose');
 const Delegations = require('./models/delegations');
@@ -12,30 +13,44 @@ const connect = mongoose.connect(url);
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cookieParser('12345-67890-09876-54321'));
 
 function auth(req, res, next) {
-    console.log(req);
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-        const err = new Error('You are not authenticated!');
-        // res.setHeader('WWW-Authenticate', 'Basic');
-        // res.status = 401;
-        res.writeHead(401, {"WWW-Authenticate": "Basic"});
-        res.end('Authentication is needed');
-        next(err);
-        return;
-    }
-    const auth = new Buffer(authHeader.split(' ')[1], 'base64').toString().split(':');
-    const user = auth[0];
-    const password = auth[1];
-    if (user === 'admin' && password === 'password') {
-        next();
+    console.log(req.signedCookies);
+    if (!req.signedCookies.user) {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            const err = new Error('You are not authenticated!');
+            // res.setHeader('WWW-Authenticate', 'Basic');
+            // res.status = 401;
+            res.writeHead(401, {"WWW-Authenticate": "Basic"});
+            res.end('Authentication is needed');
+            next(err);
+            return;
+        }
+        const auth = new Buffer(authHeader.split(' ')[1], 'base64').toString().split(':');
+        const user = auth[0];
+        const password = auth[1];
+        if (user === 'admin' && password === 'password') {
+            res.cookie('user', 'admin', {signed: true});
+            next();
+        }
+        else {
+            const err = new Error('You are not authenticated!');
+            res.setHeader('WWW-Authenticate', 'Basic');
+            res.status = 401;
+            next(err);
+        }
     }
     else {
-        const err = new Error('You are not authenticated!');
-        res.setHeader('WWW-Authenticate', 'Basic');
-        res.status = 401;
-        next(err);
+        if (req.signedCookies.user === 'admin') {
+            next();
+        }
+        else {
+            err = new Error('You are not authenticated!');
+            err.status = 401;
+            next(err);
+        }
     }
 }
 app.use(auth);
