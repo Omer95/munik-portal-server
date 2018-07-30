@@ -31,8 +31,6 @@ const delegationSchema = new Schema({
     timestamps: true
 });
 
-
-
 let Delegations = mongoose.model('Delegation', delegationSchema);
 let Delegates = mongoose.model('Delegate', delegateSchema);
 module.exports = Delegations;
